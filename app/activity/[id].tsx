@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { getActivityById } from '../../data/mockActivities';
 
@@ -13,7 +13,20 @@ const WHITE = '#FFFFFF';
 export default function ActivityDetailPage() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const activity = getActivityById(params.id);
+
+  const activity = useMemo(() => {
+    const serialized = Array.isArray(params.activity) ? params.activity[0] : params.activity;
+
+    if (serialized) {
+      try {
+        return JSON.parse(serialized);
+      } catch {
+        return null;
+      }
+    }
+
+    return getActivityById(params.id);
+  }, [params.activity, params.id]);
 
   if (!activity) {
     return (
@@ -38,11 +51,13 @@ export default function ActivityDetailPage() {
             <Text style={styles.backButtonText}>{'\u2039 \u8FD4\u56DE'}</Text>
           </Pressable>
         </View>
+
         <View style={styles.heroCard}>
           <Text style={styles.heroEmoji}>{activity.emoji}</Text>
           <Text style={styles.heroTitle}>{activity.title}</Text>
           <Text style={styles.heroSubtitle}>{activity.summary}</Text>
         </View>
+
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>{'\u6D3B\u52A8\u4FE1\u606F'}</Text>
           <Text style={styles.infoLine}>{'\u53D1\u8D77\u4EBA\uFF1A' + activity.host}</Text>
@@ -51,6 +66,7 @@ export default function ActivityDetailPage() {
           <Text style={styles.infoLine}>{'\u4EBA\u6570\uFF1A' + activity.people}</Text>
           <Text style={styles.infoLine}>{'\u8D39\u7528\uFF1A' + activity.fee}</Text>
         </View>
+
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>{'\u6D3B\u52A8\u6807\u7B7E'}</Text>
           <View style={styles.tagRow}>
@@ -61,12 +77,14 @@ export default function ActivityDetailPage() {
             ))}
           </View>
         </View>
+
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>{'\u53C2\u52A0\u63D0\u793A'}</Text>
-          <Text style={styles.infoLine}>{'1. \u6309\u7EA6\u5B9A\u65F6\u95F4\u5230\u573A\uFF0C\u4E34\u65F6\u6709\u4E8B\u8BF7\u53CA\u65F6\u8BF4\u660E\u3002'}</Text>
-          <Text style={styles.infoLine}>{'2. \u53EF\u5148\u5728\u6D88\u606F\u9875\u6C9F\u901A\u96C6\u5408\u70B9\u548C\u8054\u7CFB\u65B9\u5F0F\u3002'}</Text>
-          <Text style={styles.infoLine}>{'3. \u76EE\u524D\u540E\u7AEF\u57FA\u7840\u5730\u5740\uFF1Ahttp://47.102.219.206'}</Text>
+          <Text style={styles.infoLine}>{'1. \u5982\u679C\u4F60\u8981\u53C2\u52A0\uFF0C\u8BB0\u5F97\u5148\u5728\u804A\u5929\u9875\u6C9F\u901A\u96C6\u5408\u7EC6\u8282\u3002'}</Text>
+          <Text style={styles.infoLine}>{'2. \u73B0\u5728\u9996\u9875 / \u53D1\u73B0\u9875\u7684\u5217\u8868\u90FD\u6765\u81EA\u771F\u5B9E\u540E\u7AEF\u3002'}</Text>
+          <Text style={styles.infoLine}>{'3. \u540E\u7AEF\u57FA\u7840\u5730\u5740\uFF1Ahttps://47.102.219.206'}</Text>
         </View>
+
         <Pressable style={styles.primaryButton} onPress={() => router.push('/(tabs)/chat')}>
           <Text style={styles.primaryButtonText}>{'\u7ACB\u5373\u52A0\u5165\u5E76\u53BB\u804A\u5929'}</Text>
         </Pressable>

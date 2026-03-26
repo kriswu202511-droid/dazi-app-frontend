@@ -1,12 +1,49 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Tabs, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { getAuthToken } from '../../lib/session';
 
 const ACTIVE = '#2F6B45';
 const INACTIVE = '#8AA095';
 const BAR_BG = '#FAFDFC';
 
 export default function TabLayout() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      const token = await getAuthToken();
+
+      if (!active) {
+        return;
+      }
+
+      if (!token) {
+        router.replace('/login');
+        return;
+      }
+
+      setChecking(false);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [router]);
+
+  if (checking) {
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator size="large" color={ACTIVE} />
+        <Text style={styles.loadingText}>{'\u6B63\u5728\u6253\u5F00\u642D\u5B50\u9996\u9875...'}</Text>
+      </View>
+    );
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -24,3 +61,18 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F7FBF8',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#607166',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+});
